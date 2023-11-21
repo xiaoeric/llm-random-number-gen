@@ -260,3 +260,24 @@ bits_nonuniform_pcfg = Pcfg([
     Nonterminal('S', [Terminal('0')], 0.75),
     Nonterminal('S', [Terminal('1')], 0.25),
 ], 'S', '')
+
+number_10_pcfg = Pcfg([
+    Nonterminal('N', [Terminal('1')], 0.1),
+    Nonterminal('N', [Terminal('2')], 0.1),
+    Nonterminal('N', [Terminal('3')], 0.1),
+    Nonterminal('N', [Terminal('4')], 0.1),
+    Nonterminal('N', [Terminal('5')], 0.1),
+    Nonterminal('N', [Terminal('6')], 0.1),
+    Nonterminal('N', [Terminal('7')], 0.1),
+    Nonterminal('N', [Terminal('8')], 0.1),
+    Nonterminal('N', [Terminal('9')], 0.1),
+    Nonterminal('N', [Terminal('10')], 0.1),
+], 'N', '')
+
+number_100_pcfg = Pcfg([
+    Nonterminal('N', [Terminal(f'{i}')], 0.01) for i in range(100)
+], 'N', '')
+
+number_1000_pcfg = Pcfg([
+    Nonterminal('N', [Terminal(f'{i}')], 0.001) for i in range(1000)
+], 'N', '')

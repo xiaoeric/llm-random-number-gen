@@ -136,7 +136,7 @@ class LlamaRunner(Runner):
         return log_perplexity
 
 
-    def generate_line(self, prompt, n_samples, raw=False):
+    def generate_line(self, prompt, raw=False):
         newline_tok = self.llm.tokenize(b'\n')[1]
 
         sampling_params = {
@@ -162,7 +162,7 @@ class LlamaRunner(Runner):
             logits[self.llm._token_eos] = -np.inf
             return logits
 
-        stopping_criteria =  lambda toks, _: toks.count(newline_tok) >= 1 + prompt.count('\n')
+        stopping_criteria =  lambda toks, _: np.count_nonzero(toks == newline_tok) >= 1 + prompt.count('\n')
         prompt_size = len(self.llm.tokenize(prompt.encode('utf-8')))
         max_tokens = 512 - prompt_size
         if self.max_gen_tokens_per_line:
@@ -171,9 +171,10 @@ class LlamaRunner(Runner):
         return self.llm(prompt, max_tokens=max_tokens, echo=False, stopping_criteria=stopping_criteria, logits_processor=logits_processor, **sampling_params)['choices'][0]['text']
 
 model_params = {
-    'llama-7B': ('llama', 'models/llama-7B/ggml-model-q8_0.bin', 1000),
+    'llama-7B-q4_0': ('llama', '../llama.cpp/models/7B/ggml-model-q4_0.gguf', 1000),
+    'llama-7B-q8_0': ('llama', '../llama.cpp/models/7B/ggml-model-q8_0.gguf', 1000),
     'alpaca-7B': ('llama', 'models/alpaca-7B/ggml-model-q8_0.bin', 1000),
-    'llama-13B': ('llama', 'models/llama-13B/ggml-model-q8_0.bin', 1000),
+    'llama-13B': ('llama', '../llama.cpp/models/13B/ggml-model-q8_0.gguf', 1000),
     'llama-30B': ('llama', 'models/llama-30B/ggml-model-q8_0.bin', 1000),
     'llama-65B': ('llama', 'models/llama-65B/ggml-model-q8_0.bin', 1000),
     'llama-7B-huggingface': ('huggingface', 'decapoda-research/llama-7b-hf', 0),
@@ -187,6 +188,9 @@ experiments = {
     'bits_uniform': util.bits_uniform_pcfg,
     'bits_nonuniform': util.bits_nonuniform_pcfg,
     'bits_nonuniform_evil': util.bits_nonuniform_pcfg,
+    'numbers_10': util.number_10_pcfg,
+    'numbers_100': util.number_100_pcfg,
+    'numbers_1000': util.number_1000_pcfg,
 }
 
 def main():
@@ -238,6 +242,12 @@ def main():
                 prompt = 'The following is a list of bits of which 75% are 0 and 25% are 1:\n\n'
             elif args.experiment == 'bits_nonuniform_evil':
                 prompt = 'The following is a list of bits of which 25% are 0 and 75% are 1:\n\n'
+            elif args.experiment == 'numbers_10':
+                prompt = 'The following is a list of uniform random integers from 1 to 10:\n\n'
+            elif args.experiment == 'numbers_100':
+                prompt = 'The following is a list of uniform random integers from 1 to 100:\n\n'
+            elif args.experiment == 'numbers_1000':
+                prompt = 'The following is a list of uniform random integers from 1 to 1000:\n\n'
             else:
                 raise ValueError('unknown experiment "{}"'.format(args.experiment))
 
