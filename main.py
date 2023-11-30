@@ -171,14 +171,14 @@ class LlamaRunner(Runner):
         return self.llm(prompt, max_tokens=max_tokens, echo=False, stopping_criteria=stopping_criteria, logits_processor=logits_processor, **sampling_params)['choices'][0]['text']
 
 model_params = {
-    'llama-7B-q4_0': ('llama', '../llama.cpp/models/7B/ggml-model-q4_0.gguf', 1000),
-    'llama-7B-q8_0': ('llama', '../llama.cpp/models/7B/ggml-model-q8_0.gguf', 1000),
-    'alpaca-7B': ('llama', 'models/alpaca-7B/ggml-model-q8_0.bin', 1000),
-    'llama-13B': ('llama', '../llama.cpp/models/13B/ggml-model-q8_0.gguf', 1000),
-    'llama-30B': ('llama', 'models/llama-30B/ggml-model-q8_0.bin', 1000),
-    'llama-65B': ('llama', 'models/llama-65B/ggml-model-q8_0.bin', 1000),
-    'llama-7B-huggingface': ('huggingface', 'decapoda-research/llama-7b-hf', 0),
-    'bert-tiny-uncased': ('huggingface', 'google/bert_uncased_L-2_H-128_A-2', 0),
+    'llama-7B-q4_0': ('llama', '/data/eric/llama.cpp/models/7B/ggml-model-q4_0.gguf', 1000),
+    # 'llama-7B-q8_0': ('llama', '../llama.cpp/models/7B/ggml-model-q8_0.gguf', 1000),
+    # 'alpaca-7B': ('llama', 'models/alpaca-7B/ggml-model-q8_0.bin', 1000),
+    # 'llama-13B': ('llama', '../llama.cpp/models/13B/ggml-model-q8_0.gguf', 1000),
+    # 'llama-30B': ('llama', 'models/llama-30B/ggml-model-q8_0.bin', 1000),
+    # 'llama-65B': ('llama', 'models/llama-65B/ggml-model-q8_0.bin', 1000),
+    # 'llama-7B-huggingface': ('huggingface', 'decapoda-research/llama-7b-hf', 0),
+    # 'bert-tiny-uncased': ('huggingface', 'google/bert_uncased_L-2_H-128_A-2', 0),
 }
 
 experiments = {
@@ -209,7 +209,12 @@ def main():
     autoregressive_parser.add_argument('--rollouts', type=int, default=1)
     autoregressive_parser.add_argument('--raw', action='store_true')
 
+    parser.add_argument('--data-dir', default='/data/eric/llm-random-number-gen/data')
+
     args = parser.parse_args()
+
+    if(args.debug):
+        print("Debug start")
 
     if 'bits' in args.experiment:
         max_gen_tokens_per_line = 5
@@ -227,7 +232,7 @@ def main():
 
     for prompt_examples in tqdm.tqdm(args.prompt_examples):
         for trial in tqdm.trange(args.trials, leave=False):
-            data_dir = os.path.join('data', args.experiment, args.command, 'prompt-{}'.format(prompt_examples), args.model.lower(), 'trial-{}'.format(trial))
+            data_dir = os.path.join(args.data_dir, args.experiment, args.command, 'prompt-{}'.format(prompt_examples), args.model.lower(), 'trial-{}'.format(trial))
             os.makedirs(data_dir, exist_ok=True)
 
             if args.experiment == 'pcfg':
