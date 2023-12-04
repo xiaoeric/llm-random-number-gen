@@ -1,5 +1,6 @@
 import json
 import numpy as np
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 from scipy import stats
 
@@ -53,14 +54,43 @@ def chi_square(n):
     return chi_2
 
 
+def make_boxplots():
+    uniform = np.linspace(0, 1, 200)
+    data_2d = np.stack([uniform] + [np.array(data[str(n)]) / n for n in [10, 100, 1000, 10000, 100000]])
+    plt.boxplot(data_2d.T, labels=['uniform'] + [f'n={n}' for n in [10, 100, 1000, 10000, 100000]])
+    plt.ylabel('')
+    plt.show()
+
+
+def make_stacked_hist():
+    bins = np.linspace(0.0, 1.0, 11)
+    cmap = mpl.colormaps['viridis']
+    classes = ['10', '100', '1000', '10000', '100000']
+    colors = {n: cmap(i / (len(classes) - 1)) for i, n in enumerate(classes)}
+
+    all_samples = []
+    vals = [10, 100, 1000, 10000, 100000]
+    for n in vals:
+        samples = (np.array(data[str(n)]) / n)
+        all_samples.append(samples)
+    
+    plt.hist(all_samples, bins, label=[f'x={n}' for n in vals], color=[colors[str(n)] for n in vals], histtype='bar')
+
+    uniform = np.linspace(1, 100000, 200) / 100000
+    # plt.plot(bins, [20]*len(bins), label='uniform', color='black')
+    plt.hist(uniform, bins, label='uniform', color='black', histtype='step', linestyle='--')
+    # plt.hist([0.6999999]*20, bins, label='test', color='red')
+    plt.legend()
+    plt.ylabel('count')
+    plt.xlabel('norm. value')
+    plt.title('GPT-3.5 RNG over integers on [1, x] (n=200)')
+    plt.show()
+
+
 with open('chatgpt_results.json') as f:
     data = json.load(f)
 
-for n in [10, 100, 1000, 10000, 100000]:
-    print_stats(n)
+# for n in [10, 100, 1000, 10000, 100000]:
+#     print_stats(n)
 
-uniform = np.linspace(0, 1, 200)
-data_2d = np.stack([uniform] + [np.array(data[str(n)]) / n for n in [10, 100, 1000, 10000, 100000]])
-plt.boxplot(data_2d.T, labels=['uniform'] + [f'n={n}' for n in [10, 100, 1000, 10000, 100000]])
-plt.ylabel('')
-plt.show()
+make_stacked_hist()
